@@ -5,6 +5,8 @@ import { DashboardHero } from './components/dashboard/DashboardHero';
 import { DashboardPillarBar } from './components/dashboard/DashboardPillarBar';
 import { DashboardTaxaCards } from './components/dashboard/DashboardTaxaCards';
 import { DashboardInFocusBanner } from './components/dashboard/DashboardInFocusBanner';
+import { DashboardEditorialSplit } from './components/dashboard/DashboardEditorialSplit';
+import { DashboardCommunityAndBlog } from './components/dashboard/DashboardCommunityAndBlog';
 
 // Core Research Modules
 import { ManuscriptExplorer } from './components/ManuscriptExplorer';
@@ -214,6 +216,34 @@ export default function App() {
           )}
 
         </div>
+
+        {/* 7. BlooM Editorial Split Section ("More Than Folk Medicine") */}
+        {activeTab === 'overview' && (
+          <DashboardEditorialSplit
+            onExploreSafety={() => {
+              setActiveTab('safety');
+              window.scrollTo({ top: 400, behavior: 'smooth' });
+            }}
+            onOpenPitchGuide={() => setIsPitchGuideOpen(true)}
+          />
+        )}
+
+        {/* 8. BlooM Community Testimonials, Research Blog Dispatches & Pre-Footer Banner */}
+        {activeTab === 'overview' && (
+          <DashboardCommunityAndBlog
+            onOpenEvaluation={() => setIsEvaluationOpen(true)}
+            onSelectCaseStudy={(id) => {
+              setSelectedCaseStudyId(id);
+              setActiveTab('overview');
+              handleJumpToSection('workbench-section');
+            }}
+            onLaunchNlp={() => {
+              setActiveTab('nlp');
+              window.scrollTo({ top: 300, behavior: 'smooth' });
+            }}
+            onOpenPitchGuide={() => setIsPitchGuideOpen(true)}
+          />
+        )}
       </main>
 
       {/* 7. Editorial Scientific Dashboard Footer in BlooM Style */}
