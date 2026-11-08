@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GREEK_BOTANICAL_DICTIONARY, ETHNO_CASE_STUDIES } from '../data/ethnopharmData';
-import { Layers, Play, CheckCircle2, AlertTriangle, Sparkles, BookOpen, ArrowRight, HelpCircle, RefreshCw, ShieldAlert, XCircle } from 'lucide-react';
+import { Layers, Play, CheckCircle2, AlertTriangle, Sparkles, BookOpen, ArrowRight, HelpCircle, RefreshCw, ShieldAlert, XCircle, Info } from 'lucide-react';
 
 // Deaccent and normalize Greek unicode for robust morphological root matching
 function normalizeGreek(str) {
@@ -21,7 +21,7 @@ const SAMPLE_CRITICAL_EDITIONS = [
     title: "Dioscorides IV.33 (Sideritis / Mountain Tea)",
     editionRef: "Wellmann Book IV, Chapter 33 (IV.33 Wellm.) · Codex Vindobonensis fol. 294r",
     greek: "Σιδηρῖτις ἡ ἐπιμήκης· φύλλα ἔχει ὅμοια πράσῳ, τραχύτερα δὲ καὶ ἐρυθρώτερα, μῆκος πηχυαῖον, ῥάβδους λεπτάς. ἁρμόζει δὲ θαυμαστῶς πρὸς τὰ σιδήρῳ τραύματα, αἵματος ἐπιστάτης οὖσα καὶ φλεγμονὰς καταπαύουσα, βηχὸς δὲ καὶ ῥευματισμοῦ θώρακος ἴαμα.",
-    note: "Vulnerary for weapon wounds, staunching blood, calming inflammation."
+    note: "Staunching blood, calming inflammation, and healing weapon wounds."
   },
   {
     id: "hypericum-perforatum",
@@ -57,22 +57,14 @@ const SAMPLE_CRITICAL_EDITIONS = [
     editionRef: "Wellmann Book IV, Chapter 150 (IV.150 Wellm.) · Codex Vindobonensis fol. 320r",
     greek: "Σίκυς ἄγριος... Ἐλατήριον· ἄγει διὰ τῆς κάτω κοιλίας ὕδωρ καὶ φλέγμα, ἁρμόζει πρὸς ὑδρωπικοὺς καὶ ὄγκους σκληροὺς διαλύει, πλὴν θανατηφόρος γάρ.",
     note: "High Toxicity Alert: Potent JAK2 inhibitor; severe mucosal necrosis risk."
+  },
+  {
+    id: "homonym-mineral-test",
+    title: "Homonym Test: Mineral Σιδηρίτης λίθος (Magnetite)",
+    editionRef: "Dioscorides Book V (Metallica et Mineralia) · Stone Homonym Disambiguation",
+    greek: "Σιδηρίτης λίθος ἐστὶν ὅμοιος τῷ μαγνήτῃ, ἕλκων τὸν σίδηρον... οὐ πόα ἐστίν, ἀλλὰ λίθος μέλας.",
+    note: "Test: Disambiguates iron-stone mineral from botanical Sideritis herb."
   }
-];
-
-// Stem rules for robust inflection matching across cases (nominative, genitive, accusative)
-const GREEK_STEM_RULES = [
-  { stem: "σιδηριτ", lemma: "Σιδηρῖτις", plantKey: "sideritis-scardica", binomial: "Sideritis scardica Griseb.", family: "Lamiaceae", conf: 0.94 },
-  { stem: "σιδηροχορτ", lemma: "Σιδηρόχορτον", plantKey: "sideritis-scardica", binomial: "Sideritis scardica Griseb.", family: "Lamiaceae", conf: 0.94 },
-  { stem: "υπερικ", lemma: "Ὑπερικόν", plantKey: "hypericum-perforatum", binomial: "Hypericum perforatum L.", family: "Hypericaceae", conf: 0.95 },
-  { stem: "σπαθοχορτ", lemma: "Σπαθόχορτον", plantKey: "hypericum-perforatum", binomial: "Hypericum perforatum L.", family: "Hypericaceae", conf: 0.95 },
-  { stem: "σχιν", lemma: "Σχῖνος", plantKey: "pistacia-lentiscus", binomial: "Pistacia lentiscus L. var. chia Duhamel", family: "Anacardiaceae", conf: 0.97 },
-  { stem: "μαστιχ", lemma: "Μαστίχη", plantKey: "pistacia-lentiscus", binomial: "Pistacia lentiscus L. var. chia Duhamel", family: "Anacardiaceae", conf: 0.98 },
-  { stem: "κροκ", lemma: "Κρόκος", plantKey: "crocus-sativus", binomial: "Crocus sativus L.", family: "Iridaceae", conf: 0.98 },
-  { stem: "ελενι", lemma: "Ἑλένιον", plantKey: "inula-helenium", binomial: "Inula helenium L.", family: "Asteraceae", conf: 0.96 },
-  { stem: "ελατηρι", lemma: "Ἐλατήριον", plantKey: "ecballium-elaterium", binomial: "Ecballium elaterium (L.) A.Rich.", family: "Cucurbitaceae", conf: 0.98 },
-  { stem: "σικυ", lemma: "Σίκυς", plantKey: "ecballium-elaterium", binomial: "Ecballium elaterium (L.) A.Rich.", family: "Cucurbitaceae", conf: 0.98 },
-  { stem: "δικταμν", lemma: "Δίκταμνον", plantKey: null, binomial: "Origanum dictamnus L.", family: "Lamiaceae", conf: 0.92 }
 ];
 
 export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
@@ -81,7 +73,7 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
 
-  // Dynamic Rule-Based & Dictionary Tokenization Engine with Morphological Stems
+  // Dynamic Rule-Based & 60+ Headword Stem Matcher
   const runLiveExtraction = (text, overridePlantKey = null) => {
     setIsAnalyzing(true);
     setTimeout(() => {
@@ -89,25 +81,42 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
       const normalizedInput = normalizeGreek(text);
       const extractedTokens = [];
 
-      // 1. Scan for Botanical Entities via Deaccented Stem Matching
-      let matchedStem = null;
-      GREEK_STEM_RULES.forEach(rule => {
-        const idx = normalizedInput.indexOf(rule.stem);
-        if (idx !== -1 && !matchedStem) {
-          matchedStem = rule;
+      // 1. Mineral Context Disambiguation Check (e.g. Σιδηρίτης λίθος vs. Σιδηρῖτις πόα)
+      const isMineralContext = normalizedInput.includes("λιθ") || normalizedInput.includes("μεταλλ") || normalizedInput.includes("ορυκτ");
+
+      // 2. Scan for Botanical Entities across 60+ Greek Headwords
+      let matchedEntry = null;
+      GREEK_BOTANICAL_DICTIONARY.forEach(entry => {
+        const idx = normalizedInput.indexOf(entry.stem);
+        if (idx !== -1 && !matchedEntry) {
+          // If stem is siderit but context says mineral (lithos), handle homonym
+          if (entry.stem === "σιδηριτ" && isMineralContext) {
+            extractedTokens.push({
+              tokenText: text.substring(idx, Math.min(text.length, idx + 10)).split(' ')[0],
+              startChar: idx,
+              endChar: idx + 9,
+              entityClass: "Mineral Homonym (Non-Botanical)",
+              normalizedConcept: "Magnetite / Iron-Stone (Σιδηρίτης λίθος)",
+              confidence: 0.95,
+              color: "bg-slate-200 text-slate-900 border-slate-400"
+            });
+            return;
+          }
+
+          matchedEntry = entry;
           extractedTokens.push({
-            tokenText: text.substring(idx, Math.min(text.length, idx + rule.stem.length + 4)).split(' ')[0],
+            tokenText: text.substring(idx, Math.min(text.length, idx + entry.stem.length + 4)).split(' ')[0],
             startChar: idx,
-            endChar: idx + rule.stem.length + 3,
+            endChar: idx + entry.stem.length + 3,
             entityClass: "Botanical Taxon",
-            normalizedConcept: `${rule.binomial} (${rule.family})`,
-            confidence: rule.conf,
+            normalizedConcept: `${entry.modernBinomial} (${entry.family}) [Wellmann ${entry.wellmann}]`,
+            confidence: entry.conf,
             color: "bg-emerald-100 text-emerald-950 border-emerald-300"
           });
         }
       });
 
-      // 2. Scan for Anatomical Targets
+      // 3. Scan for Anatomical Targets
       const anatomicalKeywords = [
         { stem: "πνευμον", norm: "Pulmonary / Lung", mesh: "D008168" },
         { stem: "θωρακ", norm: "Thorax / Chest", mesh: "D013909" },
@@ -116,7 +125,9 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
         { stem: "εγκεφαλ", norm: "Central Nervous System / Brain", mesh: "D001921" },
         { stem: "οφθαλμ", norm: "Ophthalmic / Retina", mesh: "D009885" },
         { stem: "ηπαρ", norm: "Hepatic / Liver", mesh: "D008099" },
-        { stem: "ηπατ", norm: "Hepatic / Liver", mesh: "D008099" }
+        { stem: "ηπατ", norm: "Hepatic / Liver", mesh: "D008099" },
+        { stem: "καρδι", norm: "Cardiac / Heart", mesh: "D006321" },
+        { stem: "οδοντ", norm: "Dental / Teeth", mesh: "D014070" }
       ];
 
       anatomicalKeywords.forEach(ak => {
@@ -134,7 +145,7 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
         }
       });
 
-      // 3. Scan for Clinical Symptom & Humoral Indications
+      // 4. Scan for Clinical Symptom & Humoral Indications
       const symptomKeywords = [
         { stem: "τραυμα", norm: "Wound / Laceration", target: "Platelet & Tissue Repair" },
         { stem: "φλεγμον", norm: "Inflammation (Heat)", target: "COX-2 / PTGS2 Downregulation" },
@@ -143,7 +154,8 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
         { stem: "αιματος επιστατης", norm: "Hemostasis / Bleeding", target: "Astringent Tannin Action" },
         { stem: "πυρετ", norm: "Febrile Pyrexia / Heat", target: "Cytokine Modulation" },
         { stem: "πυρικαυτ", norm: "Burns / Thermal Injury", target: "Tissue Regeneration" },
-        { stem: "θανατηφορ", norm: "Fatal Toxicity / Poison", target: "Acute Cytotoxicity Hazard" }
+        { stem: "θανατηφορ", norm: "Fatal Toxicity / Poison", target: "Acute Cytotoxicity Hazard" },
+        { stem: "ελκ", norm: "Ulcer / Mucosal Lesion", target: "Mucosal Cytoprotection" }
       ];
 
       symptomKeywords.forEach(sk => {
@@ -161,76 +173,89 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
         }
       });
 
-      // CHECK FOR OUT-OF-VOCABULARY (No botanical entity matched)
-      if (!matchedStem && !overridePlantKey) {
+      // CHECK FOR MINERAL HOMONYM OR OUT-OF-VOCABULARY
+      if (isMineralContext && !matchedEntry) {
+        setAnalysisResult({
+          rawText: text,
+          isMineralHomonym: true,
+          extractedTokens,
+          matchedBinomial: "Non-Botanical Mineral (Magnetite / Iron-stone)",
+          matchedFamily: "Mineralia / Inorganica",
+          matchedConfidence: 0.95,
+          plantKey: null,
+          rankedAlternatives: [],
+          provenanceSpanCount: extractedTokens.length,
+          pipelineVersion: "ByzMed-Domain-NER v2.0"
+        });
+        return;
+      }
+
+      if (!matchedEntry && !overridePlantKey) {
         setAnalysisResult({
           rawText: text,
           isOutOfVocabulary: true,
-          extractedTokens: extractedTokens,
+          extractedTokens,
           matchedBinomial: "Unresolved / Out of Vocabulary",
           matchedFamily: "Unknown",
           matchedConfidence: 0.0,
           plantKey: null,
           rankedAlternatives: [],
           provenanceSpanCount: extractedTokens.length,
-          pipelineVersion: "ByzMed-Domain-NER v1.5.0"
+          pipelineVersion: "ByzMed-Domain-NER v2.0"
         });
         return;
       }
 
-      const activePlantKey = overridePlantKey || matchedStem?.plantKey || "sideritis-scardica";
-      const plantObj = ETHNO_CASE_STUDIES.find(p => p.id === activePlantKey) || ETHNO_CASE_STUDIES[0];
+      // Check if matched entry corresponds to one of the 6 deep benchmark flora
+      let activePlantKey = overridePlantKey;
+      if (!activePlantKey && matchedEntry) {
+        const found = ETHNO_CASE_STUDIES.find(p => p.acceptedBinomial.toLowerCase().includes(matchedEntry.modernBinomial.toLowerCase().split(' ')[0]));
+        if (found) activePlantKey = found.id;
+      }
+
+      const plantObj = activePlantKey ? ETHNO_CASE_STUDIES.find(p => p.id === activePlantKey) : null;
 
       let rankedAlternatives = [];
-      if (plantObj.id === 'sideritis-scardica') {
-        rankedAlternatives = [
-          { binomial: "Sideritis scardica Griseb.", score: 0.94, note: "Top morphological fit (lanate tomentum)" },
-          { binomial: "Sideritis syriaca L.", score: 0.72, note: "Southern Hellenic mountain variant" },
-          { binomial: "Stachys recta L.", score: 0.38, note: "Medieval Latin conflation (discarded)" }
-        ];
-      } else if (plantObj.id === 'hypericum-perforatum') {
-        rankedAlternatives = [
-          { binomial: "Hypericum perforatum L.", score: 0.95, note: "Pellucid essential oil glands & black marginal dots" },
-          { binomial: "Hypericum empetrifolium Willd.", score: 0.61, note: "Mediterranean shrubby variant" }
-        ];
-      } else if (plantObj.id === 'inula-helenium') {
-        rankedAlternatives = [
-          { binomial: "Inula helenium L.", score: 0.96, note: "Aromatic bitter root matching Wellmann I.27" },
-          { binomial: "Inula viscosa (Dittrichia)", score: 0.44, note: "Resinous false fleabane" }
-        ];
-      } else if (plantObj.id === 'pistacia-lentiscus') {
-        rankedAlternatives = [
-          { binomial: "Pistacia lentiscus L. var. chia Duhamel", score: 0.97, note: "Chios mastic tear-yielding oleoresin" },
-          { binomial: "Pistacia terebinthus L.", score: 0.58, note: "Terebinth wood resin" }
-        ];
-      } else if (plantObj.id === 'crocus-sativus') {
-        rankedAlternatives = [
-          { binomial: "Crocus sativus L.", score: 0.98, note: "Tripartite fragrant crimson stigmas" },
-          { binomial: "Carthamus tinctorius L. (Safflower)", score: 0.18, note: "Historical adulterant" }
-        ];
-      } else {
-        rankedAlternatives = [
-          { binomial: plantObj.acceptedBinomial, score: plantObj.disambiguationConfidence, note: "Primary botanical candidate" }
-        ];
+      if (matchedEntry?.isAmbiguous) {
+        rankedAlternatives.push({
+          binomial: matchedEntry.modernBinomial,
+          score: matchedEntry.conf,
+          note: matchedEntry.ambiguityNote
+        });
+      } else if (plantObj) {
+        rankedAlternatives.push({
+          binomial: plantObj.acceptedBinomial,
+          score: plantObj.disambiguationConfidence,
+          note: "Primary accepted taxon on Kew POWO"
+        });
+      } else if (matchedEntry) {
+        rankedAlternatives.push({
+          binomial: matchedEntry.modernBinomial,
+          score: matchedEntry.conf,
+          note: `Extracted from Wellmann ${matchedEntry.wellmann}`
+        });
       }
 
       setAnalysisResult({
         rawText: text,
         isOutOfVocabulary: false,
+        isMineralHomonym: false,
         extractedTokens,
-        matchedBinomial: plantObj.acceptedBinomial,
-        matchedFamily: plantObj.botanicalFamily,
-        matchedConfidence: plantObj.disambiguationConfidence,
-        plantKey: plantObj.id,
+        matchedBinomial: plantObj ? plantObj.acceptedBinomial : matchedEntry?.modernBinomial,
+        matchedFamily: plantObj ? plantObj.botanicalFamily : matchedEntry?.family,
+        matchedConfidence: plantObj ? plantObj.disambiguationConfidence : matchedEntry?.conf,
+        plantKey: plantObj ? plantObj.id : null,
+        isDeepDossier: !!plantObj,
+        ambiguityNote: matchedEntry?.ambiguityNote || null,
         rankedAlternatives,
         provenanceSpanCount: extractedTokens.length,
-        pipelineVersion: "ByzMed-Domain-NER v1.5.0"
+        pipelineVersion: "ByzMed-Domain-NER v2.0 (60+ Headwords)"
       });
 
-      if (onSelectCaseStudy && plantObj.id) {
+      if (onSelectCaseStudy && plantObj) {
         onSelectCaseStudy(plantObj.id);
       }
-    }, 280);
+    }, 250);
   };
 
   useEffect(() => {
@@ -246,13 +271,13 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
   return (
     <div className="bg-white border border-[#E8E6DF] rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
       
-      {/* Research Use Only Banner */}
+      {/* Research Use Only Persistent Banner */}
       <div className="bg-amber-50/80 border border-amber-200/80 p-3 rounded-2xl flex items-center justify-between text-xs text-amber-950 font-mono">
         <div className="flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
           <span>RESEARCH USE ONLY · NOT MEDICAL ADVICE. Curated extraction pipeline for scientific evaluation.</span>
         </div>
-        <span className="text-[10px] text-amber-800 hidden md:inline">Wellmann (1906–1914) Critical Editions</span>
+        <span className="text-[10px] text-amber-800 hidden md:inline">Max Wellmann (1906–1914) Critical Editions</span>
       </div>
 
       {/* Step Header */}
@@ -267,19 +292,19 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
             </h2>
           </div>
           <p className="text-xs text-[#62746A] mt-0.5">
-            Parses Greek polytonic Unicode, normalizes inflected declensions, and computes character offset spans into critical edition texts.
+            Normalized stem matching across 60+ Dioscoridean headwords. Resolves inflections, flags mineral homonyms, and anchors character spans to Wellmann critical editions.
           </p>
         </div>
 
         <div className="text-xs font-mono bg-[#EBF3EF] text-[#134E35] border border-[#134E35]/20 px-3 py-1 rounded-full font-semibold">
-          Wellmann Critical Editions
+          60+ Dioscoridean Headwords
         </div>
       </div>
 
       {/* Preset Passage Selector with Exact Wellmann Citations */}
       <div className="space-y-2">
         <label className="text-xs font-bold text-[#113827] uppercase tracking-wider block">
-          Verified Critical Edition Passages (Max Wellmann, 1906–1914):
+          Verified Critical Edition Passages & Disambiguation Tests:
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {SAMPLE_CRITICAL_EDITIONS.map((preset) => {
@@ -322,12 +347,12 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
           onChange={(e) => setInputText(e.target.value)}
           rows={3}
           className="w-full p-4 rounded-2xl border border-[#D5D3CA] bg-[#FCFCFA] font-greek text-base sm:text-lg text-[#113827] focus:outline-hidden focus:ring-2 focus:ring-[#113827] focus:border-transparent leading-relaxed"
-          placeholder="Paste Greek medical text (e.g. inflected: τῆς σιδηρίτιδος, ὑπερικοῦ, μαστίχης)..."
+          placeholder="Paste Greek text (e.g. inflected: τῆς σιδηρίτιδος, ὑπερικοῦ, μαστίχης, or test non-botanical Greek)..."
         />
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           <div className="text-[11px] text-[#718277]">
-            Supports inflected forms (e.g. genitive <span className="font-greek font-bold text-[#113827]">σιδηρίτιδος</span>, <span className="font-greek font-bold text-[#113827]">ὑπερικοῦ</span>). Rejects non-botanical Greek safely.
+            Supports declension inflection (genitive <span className="font-greek font-bold text-[#113827]">σιδηρίτιδος</span>). Distinguishes mineral homonym (<span className="font-greek font-bold text-[#113827]">σιδηρίτης λίθος</span>). Refuses out-of-vocabulary Greek.
           </div>
 
           <button
@@ -353,8 +378,20 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
       {/* Extraction Results */}
       {analysisResult && (
         <div className="space-y-5 pt-2 border-t border-[#F1EFEA]">
-          {/* OUT-OF-VOCABULARY STATE */}
-          {analysisResult.isOutOfVocabulary ? (
+          {/* MINERAL HOMONYM CASE */}
+          {analysisResult.isMineralHomonym ? (
+            <div className="p-5 rounded-2xl bg-slate-100 border border-slate-300 space-y-2">
+              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                <Info className="w-5 h-5 text-slate-700" />
+                <span>Homonym Disambiguation: Mineral Detected (Not a Plant)</span>
+              </div>
+              <p className="text-xs text-slate-700 leading-relaxed">
+                The term <span className="font-greek font-bold">σιδηρίτης</span> was matched, but the surrounding passage contains mineral markers (<span className="font-greek font-bold">λίθος</span>, stone / iron-stone). 
+                The system successfully disambiguates this entry as the mineral <strong>Magnetite</strong> (Dioscorides Book V), preventing false resolution to the botanical wound-herb <em>Sideritis</em>.
+              </p>
+            </div>
+          ) : analysisResult.isOutOfVocabulary ? (
+            /* OUT-OF-VOCABULARY STATE */
             <div className="p-5 rounded-2xl bg-amber-50/80 border border-amber-300 space-y-2">
               <div className="flex items-center gap-2 text-amber-950 font-bold text-sm">
                 <XCircle className="w-5 h-5 text-amber-700" />
@@ -393,6 +430,17 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
                 </div>
               </div>
 
+              {/* Taxonomic Ambiguity Alert if Polysemic */}
+              {analysisResult.ambiguityNote && (
+                <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 text-xs text-amber-950 flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block font-bold">Historical Taxonomic Polysemy Notice:</strong>
+                    <span>{analysisResult.ambiguityNote}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Character Spans Table */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-[#113827] uppercase tracking-wider block">
@@ -429,7 +477,13 @@ export function CustomPassageAnalyzer({ onSelectCaseStudy, onProceedToStep2 }) {
               </div>
 
               {/* Step 1 to Step 2 Transition CTA */}
-              <div className="pt-3 flex justify-end">
+              <div className="pt-3 flex items-center justify-between">
+                <div className="text-[11px] text-[#718277]">
+                  {analysisResult.isDeepDossier 
+                    ? "✓ Full phytochemical & molecular target dossier available for this taxon." 
+                    : "ℹ️ Entity identified across 60+ gazetteer; navigate pipeline to inspect mapped classes."}
+                </div>
+
                 <button
                   onClick={() => {
                     if (onProceedToStep2) onProceedToStep2(analysisResult.plantKey);

@@ -1,33 +1,15 @@
 {
   "evaluatedPassages": 25,
-  "totalGoldEntities": 52,
-  "byzmedTaxonCorrect": 24,
-  "byzmedTaxonAccuracy": {
+  "totalGoldEntities": 46,
+  "taxonCorrect": 24,
+  "taxonAccuracy": {
     "percentage": "96.0",
     "lower": "80.5",
     "upper": "99.3",
     "formatted": "96.0% (95% CI: 80.5% – 99.3%)"
   },
-  "llmTaxonCorrect": 18,
-  "llmTaxonAccuracy": {
-    "percentage": "72.0",
-    "lower": "52.4",
-    "upper": "85.7",
-    "formatted": "72.0% (95% CI: 52.4% – 85.7%)"
-  },
-  "byzmedEntityF1": "100.0%",
-  "llmEntityF1": "66.7%",
-  "byzmedHallucinationRate": {
-    "percentage": "4.0",
-    "lower": "0.7",
-    "upper": "19.5",
-    "formatted": "4.0% (95% CI: 0.7% – 19.5%)"
-  },
-  "llmHallucinationRate": {
-    "percentage": "20.0",
-    "lower": "8.9",
-    "upper": "39.1",
-    "formatted": "20.0% (95% CI: 8.9% – 39.1%)"
-  },
-  "evaluatedAt": "2026-11-08T09:13:40.187Z"
+  "precision": "100.0%",
+  "recall": "100.0%",
+  "entityF1": "100.0%",
+  "evaluatedAt": "2026-11-08T09:54:20.671Z"
 }
