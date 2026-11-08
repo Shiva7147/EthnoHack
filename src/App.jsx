@@ -18,6 +18,7 @@ import { FairExportModal } from './components/FairExportModal';
 import { PitchGuideDrawer } from './components/PitchGuideDrawer';
 import { BlindEvaluationModal } from './components/dashboard/BlindEvaluationModal';
 import { FailureCasesModal } from './components/dashboard/FailureCasesModal';
+import { AutoTourPlayer } from './components/presentation/AutoTourPlayer';
 
 import { 
   ArrowRight, 
@@ -29,7 +30,8 @@ import {
   RotateCcw,
   ShieldCheck,
   AlertTriangle,
-  Sparkles
+  Sparkles,
+  Play
 } from 'lucide-react';
 
 export default function App() {
@@ -43,6 +45,7 @@ export default function App() {
   const [isPitchGuideOpen, setIsPitchGuideOpen] = useState(false);
   const [isEvaluationOpen, setIsEvaluationOpen] = useState(false);
   const [isFailureCasesOpen, setIsFailureCasesOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   const activePlant = ETHNO_CASE_STUDIES.find(cs => cs.id === selectedCaseStudyId) || ETHNO_CASE_STUDIES[0];
 
@@ -118,12 +121,25 @@ export default function App() {
           {/* Quick Action Navigation Buttons */}
           <div className="flex items-center gap-2 sm:gap-2.5">
             <button
+              onClick={() => setIsTourOpen(!isTourOpen)}
+              className={`text-xs px-3.5 py-1.5 rounded-full font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer ${
+                isTourOpen
+                  ? 'bg-[#A3E635] text-[#113827] ring-2 ring-[#113827]'
+                  : 'bg-[#A3E635] hover:bg-[#8CD320] text-[#113827]'
+              }`}
+              title="Start guided recording tour with synchronized live script"
+            >
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>{isTourOpen ? 'Active Tour' : 'Auto-Tour & Script'}</span>
+            </button>
+
+            <button
               onClick={() => setIsEvaluationOpen(true)}
               className="text-xs px-3 py-1.5 rounded-full font-semibold bg-[#EBF3EF] border border-[#134E35]/30 hover:bg-[#D8E9E0] text-[#113827] flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
               title="Inspect quantitative accuracy on held-out retrospective benchmark"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-              <span>Benchmark (N=20)</span>
+              <span>Validation Suite (N=25)</span>
             </button>
 
             <button
@@ -500,8 +516,12 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4 font-mono text-[11px]">
+            <button onClick={() => setIsTourOpen(true)} className="hover:text-[#113827] text-emerald-800 font-bold underline">
+              ▶ Guided Tour
+            </button>
+            <span>·</span>
             <button onClick={() => setIsEvaluationOpen(true)} className="hover:text-[#113827] underline">
-              Benchmark (N=20)
+              Validation Suite (N=25)
             </button>
             <span>·</span>
             <button onClick={() => setIsFailureCasesOpen(true)} className="hover:text-[#113827] underline">
@@ -518,6 +538,14 @@ export default function App() {
       </footer>
 
       {/* MODALS */}
+      <AutoTourPlayer
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        onTriggerStep={(step) => handleStepChange(step)}
+        onTriggerPlant={(plantId) => handleSelectPlant(plantId)}
+        onTriggerViewMode={(mode) => setViewMode(mode)}
+      />
+
       <FairExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
