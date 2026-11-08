@@ -19,6 +19,7 @@ import { PitchGuideDrawer } from './components/PitchGuideDrawer';
 import { BlindEvaluationModal } from './components/dashboard/BlindEvaluationModal';
 import { FailureCasesModal } from './components/dashboard/FailureCasesModal';
 import { AutoTourPlayer } from './components/presentation/AutoTourPlayer';
+import { PitchDeckSlides } from './components/presentation/PitchDeckSlides';
 
 import { 
   ArrowRight, 
@@ -121,6 +122,19 @@ export default function App() {
           {/* Quick Action Navigation Buttons */}
           <div className="flex items-center gap-2 sm:gap-2.5">
             <button
+              onClick={() => setViewMode('deck')}
+              className={`text-xs px-3.5 py-1.5 rounded-full font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer ${
+                viewMode === 'deck'
+                  ? 'bg-[#113827] text-[#A3E635] ring-2 ring-[#A3E635]'
+                  : 'bg-white border border-[#113827]/30 text-[#113827] hover:bg-[#FAF9F5]'
+              }`}
+              title="Open full-screen 5-slide presentation deck before launching the live demo"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#113827]" />
+              <span>Pitch Deck (5 Slides)</span>
+            </button>
+
+            <button
               onClick={() => setIsTourOpen(!isTourOpen)}
               className={`text-xs px-3.5 py-1.5 rounded-full font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer ${
                 isTourOpen
@@ -130,7 +144,7 @@ export default function App() {
               title="Start guided recording tour with synchronized live script"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
-              <span>{isTourOpen ? 'Active Tour' : 'Auto-Tour & Script'}</span>
+              <span>{isTourOpen ? 'Active Tour' : 'Auto-Tour'}</span>
             </button>
 
             <button
@@ -207,6 +221,17 @@ export default function App() {
 
             {/* Pipeline vs Knowledge Graph Mode Toggle */}
             <div className="flex items-center gap-1 self-end sm:self-auto shrink-0 bg-white p-0.5 rounded-full border border-[#D5D3CA]">
+              <button
+                onClick={() => setViewMode('deck')}
+                className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  viewMode === 'deck'
+                    ? 'bg-[#113827] text-white shadow-2xs'
+                    : 'text-[#5E6D64] hover:text-[#113827]'
+                }`}
+              >
+                <Sparkles className="w-3 h-3 text-[#A3E635]" />
+                <span>Pitch Deck (5 Slides)</span>
+              </button>
               <button
                 onClick={() => setViewMode('pipeline')}
                 className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
@@ -537,7 +562,17 @@ export default function App() {
         </div>
       </footer>
 
-      {/* MODALS */}
+      {/* MODALS & FULL-SCREEN PRESENTATION DECK */}
+      {viewMode === 'deck' && (
+        <PitchDeckSlides
+          onLaunchWorkingDemo={() => {
+            setViewMode('pipeline');
+            handleStepChange(1);
+          }}
+          onExit={() => setViewMode('pipeline')}
+        />
+      )}
+
       <AutoTourPlayer
         isOpen={isTourOpen}
         onClose={() => setIsTourOpen(false)}
