@@ -50,6 +50,19 @@ Crucially, **ByzMed-Graph explicitly rejects commercial e-commerce clutter**—n
 
 ---
 
+## 📸 Interactive Dashboard Workflow & Screenshots
+
+| Pipeline Step & View | Interface Screen & Focus |
+|---|---|
+| **Step 1: Greek NLP & Diacritic Stripping** | ![Step 1 NLP](screenshots/screenshot_1_step1_nlp.png) |
+| **Step 2: 4-Era Taxonomy Disambiguation (Kew POWO)** | ![Step 2 Taxonomy](screenshots/screenshot_2_step2_taxonomy.png) |
+| **Step 3: Phytochemical Metabolomics (ChEMBL 34)** | ![Step 3 Phytochemistry](screenshots/screenshot_3_step3_phytochemistry.png) |
+| **Step 4: Molecular Target Binding & Bioactivity** | ![Step 4 Targets](screenshots/screenshot_4_step4_targets.png) |
+| **Step 5: Pharmacovigilance & CYP3A4 Safety Matrix** | ![Step 5 Safety](screenshots/screenshot_5_step5_pharmacovigilance.png) |
+| **Interactive FAIR Knowledge Graph View** | ![Knowledge Graph](screenshots/screenshot_knowledge_graph.png) |
+
+---
+
 ## 📊 2. Automated Internal Validation & Regression Suite ($N=25$)
 
 To verify deterministic reproducibility and protect against algorithmic regressions, we evaluate our deaccenting stem matcher against an **internal development suite of 25 classical Greek passages across 46 annotated entities** (Dioscorides Books I–V ed. Wellmann 1906–1914, Galen ed. Kühn, and Aktouarios ed. Ideler). We report exact binomial counts and Wilson Score 95% Confidence Intervals without synthetic or unmeasured LLM baselines:
