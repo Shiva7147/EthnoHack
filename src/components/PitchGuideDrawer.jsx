@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
-import { Video, Clock, CheckCircle2, FileText, X, Sparkles, Award, HelpCircle, ShieldAlert, Zap, Timer } from 'lucide-react';
+import { Presentation, Clock, CheckCircle2, FileText, X, Sparkles, Award, HelpCircle, ShieldAlert, Zap, Timer } from 'lucide-react';
 
 const SHORT_PITCH_3_MIN = [
   {
     step: "Minute 0:00 – 0:45",
-    title: "1. The Hook (The 1999–2000 Hypericum Transplant Crisis)",
-    script: "Judges: In February 2000, The Lancet published a landmark report by Ruschitzka et al. describing two cardiac-transplant patients who suffered acute organ rejection. Their blood cyclosporine levels had plunged from therapeutic concentrations down to undetectable levels. The culprit was self-medication with St. John's Wort—a plant prescribed for melancholy since Dioscorides. Hyperforin binds the human PXR receptor with nanomolar affinity (EC50 = 27 nM; Wentworth et al., JCI 2000), inducing CYP3A4 by up to 5-fold and clearing the life-saving immunosuppressant. This demonstrates why ethnopharmacology cannot rely on blind chatbots or romantic folklore—it demands rigorous, deterministic pharmacovigilance."
+    title: "1. The Hook (The 2000 Lancet Hypericum Transplant Crisis)",
+    script: "Judges: In February 2000, The Lancet published a landmark report by Ruschitzka et al. describing two cardiac-transplant patients who suffered acute organ rejection. Their blood cyclosporine levels had plunged from the therapeutic window (~150 ng/mL) down to 61 ng/mL and <50 ng/mL. The culprit was self-medication with St. John's Wort—a plant prescribed since Dioscorides. Hyperforin binds the human PXR receptor with nanomolar affinity (apparent inhibition constant Ki = 27 nM; Moore et al., PNAS 2000; Wentworth et al., J Endocrinol 2000), upregulating CYP3A4 and clearing the life-saving immunosuppressant. This demonstrates why ethnopharmacology cannot rely on blind chatbots or romantic folklore—it demands rigorous, deterministic pharmacovigilance."
   },
   {
     step: "Minute 0:45 – 1:45",
     title: "2. The 5-Step Pipeline (Live Demo on Step 1)",
-    script: "ByzMed-Graph bridges 2,000 years of Mediterranean medicine in five verifiable steps:\n1. Ingestion & NLP: We deaccent and stem-match Greek medical text, computing exact character-span offsets into Max Wellmann's 1906 critical editions.\n2. 4-Era Taxonomy: We resolve historical denominations across Classical, Galenic, Byzantine, and Linnaean eras to Kew Royal Botanic Gardens accepted binomials.\n3. Phytochemistry: We profile constituent secondary metabolites from ChEMBL 34 and PubChem with 2D structures and Lipinski properties.\n4. Molecular Targets: We crosswalk ancient humoral terms ('cooling burning fever') to MeSH and human protein binding assays in UniProt.\n5. Epistemic Rigor: We separate Tier 1A double-blind RCTs from Tier 1B EMA traditional-use monographs, flagging CYP3A4 drug-herb interactions."
+    script: "ByzMed-Graph bridges 2,000 years of Mediterranean medicine in five verifiable steps:\n1. Ingestion & NLP: We deaccent and stem-match Greek medical text, computing exact character-span offsets into Max Wellmann's 1906 critical editions.\n2. 4-Era Taxonomy: We resolve historical denominations across Classical, Galenic, Byzantine, and Linnaean eras to Kew Plants of the World Online (POWO) accepted binomials.\n3. Phytochemistry: We profile constituent secondary metabolites from ChEMBL 34 and PubChem with 2D structures and Lipinski properties.\n4. Molecular Targets: We crosswalk ancient humoral terms ('cooling burning fever') to MeSH and human protein binding assays in UniProt.\n5. Epistemic Rigor: We separate Tier 1A double-blind RCTs from Tier 1B EMA traditional-use monographs, flagging CYP3A4 drug-herb interactions."
   },
   {
     step: "Minute 1:45 – 2:30",
-    title: "3. Retrospective Benchmark & Toxicity Realism",
-    script: "We do not overclaim. On a gold-standard benchmark of 25 classical passages across 52 annotated entities, our deterministic pipeline achieved 96.0% taxonomic accuracy (24/25, 95% CI: 80.5%–99.3%) compared to 72.0% for a zero-shot LLM baseline, and reduced hallucinated citations from 20.0% down to 4.0%. When testing historically cytotoxic flora like Ecballium elaterium, our graph doesn't hallucinate a magic bullet—it surfaces JAK2 inhibition alongside Dioscorides' ancient warning that it is θανατηφόρος (potentially lethal in overdose)."
+    title: "3. Internal Regression Suite & Epistemic Humility",
+    script: "We do not overclaim. On an internal development and regression set of 25 classical passages across 46 annotated entities, our deterministic pipeline achieved 96.0% taxonomic accuracy (24/25, 95% CI: 80.5%–99.3%). We report zero unverified LLM baselines. Crucially, our benchmark flags its own failure: in Dioscorides III.155, when Askyron is compared to Hyperikon ('ὅμοιόν ἐστι τῷ ὑπερικῷ'), our stem matcher flags the comparative clause collision. We surface this transparently rather than hiding it. And on cytotoxic flora like Ecballium elaterium, our graph surfaces JAK2 inhibition alongside Dioscorides' ancient warning that it is potentially lethal in overdose."
   },
   {
     step: "Minute 2:30 – 3:00",
@@ -27,11 +27,11 @@ const SHORT_PITCH_3_MIN = [
 const HARD_QA_DEFENSE = [
   {
     q: "Is Step 1 just a dictionary lookup in client-side JavaScript?",
-    a: "It is a hybrid gazetteer with morphological deaccenting (NFD Unicode stripping) and root stem matching (e.g., 'σιδηριτ' matching nominative Σιδηρῖτις and genitive σιδηρίτιδος). Crucially, if an unseen non-botanical Greek text is pasted, it cleanly flags an 'Out-of-Vocabulary / Unresolved' state rather than guessing. It is accompanied by exact character offset spans into Wellmann's critical editions."
+    a: "It is a curated 60-entry gazetteer equipped with morphological deaccenting (Unicode NFD diacritic stripping) and root stem matching (e.g., 'σιδηριτ' matching nominative Σιδηρῖτις and genitive σιδηρίτιδος). De Materia Medica contains over 800 chapters; our 60 entries represent a functional proof-of-concept. For the remaining ~90% of plants or non-botanical Greek text, the engine deliberately triggers an 'Out-of-Vocabulary / Unresolved' state rather than hallucinating. It also performs mineral homonym disambiguation to avoid confusing the herb σιδηρῖτις with the mineral σιδηρίτης λίθος (magnetite)."
   },
   {
     q: "How were the 25 benchmark passages chosen and who labelled gold answers?",
-    a: "The 25 test passages were sampled across Books I–V of Dioscorides' De Materia Medica, Galen's De Simplicibus, and Aktouarios' Diagnostics. Gold botanical labels were derived from Max Wellmann's standard critical index (Weidmann, 1906–1914) and Berendes (1902), cross-checked against Kew POWO accepted taxa."
+    a: "To be completely candid: this is an internal development and regression suite of 25 representative passages, not an independent double-blind evaluation. The gold identifications were derived from Max Wellmann's critical edition index (Weidmann, 1906–1914) and Berendes (1902), verified against Kew Plants of the World Online (POWO). We report zero synthetic LLM baselines. Crucially, our benchmark flags its own limitation: Passage 10 (Dioscorides III.155) compares Askyron to Hyperikon ('ὅμοιόν ἐστι τῷ ὑπερικῷ'), causing our stem matcher to flag a multi-entity comparative collision. We display this error openly rather than tuning it out."
   },
   {
     q: "What did your system find that a PubMed search wouldn't?",
@@ -68,7 +68,7 @@ export function PitchGuideDrawer({ isOpen, onClose }) {
         <div className="p-5 border-b border-[#E8E6DF] bg-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-2xl bg-[#113827] text-white flex items-center justify-center">
-              <Video className="w-4 h-4 text-[#A3E635]" />
+              <Presentation className="w-4 h-4 text-[#A3E635]" />
             </div>
             <div>
               <h3 className="font-serif-display text-lg font-bold text-[#113827]">

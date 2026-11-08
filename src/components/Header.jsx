@@ -51,7 +51,7 @@ export function Header({ activeTab, setActiveTab, onOpenExport, onOpenPitchGuide
           </div>
         </div>
 
-        {/* Action buttons & Pitch Video Companion */}
+        {/* Action buttons & Stage Pitch Companion */}
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setDemoMode(!demoMode)}
